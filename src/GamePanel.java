@@ -1,129 +1,81 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Random;
 
 public class GamePanel extends JPanel implements ActionListener {
 
     private static final int TILE_SIZE = 50;
     private static final int WIDTH = 1024;
     private static final int HEIGHT = 768;
-    private static int GAME_SPEED = 100;
+    private static final int GAME_SPEED = 100;
 
-    private final int[] snakeX = new int[(WIDTH * HEIGHT) / TILE_SIZE];
-    private final int[] snakeY = new int[(WIDTH * HEIGHT) / TILE_SIZE];
-    private int snakeLength = 2;
-
-    private int foodX;
-    private int foodY;
-    private boolean isGameActive = false;
-    private boolean isQuestionActive = false; // Flaga do aktywności pytania
+    private Snake snake;
+    private Food food;
+    private QuestionManager questionManager;
     private Timer gameTimer;
-    private Image appleImage;
-
-    private Random random = new Random();
-    private int number1 =random.nextInt(16);
-    private int number2 =random.nextInt(16);
 
     private int dx = TILE_SIZE;
     private int dy = 0;
-
     private int points = 0;
     private int level = 1;
-    private long startTime;
-    private JLabel questionLabel;
-    private JTextField answerField;
-    private JButton submitButton;
+    private boolean isGameActive = true;
 
+    private long startTime;
+    private Image appleImage;
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         this.setBackground(Color.BLACK);
         this.setFocusable(true);
-        this.setLayout(null); // Ustawienie layoutu na null do niestandardowych komponentów
+        this.setLayout(null);
         this.addKeyListener(new MyKeyAdapter());
 
         loadAppleImage();
-        initializeQuestionComponents();
-        initializeGame();
+        initializeComponents();
+        startGame();
     }
 
     private void loadAppleImage() {
         try {
             appleImage = new ImageIcon(getClass().getResource("/apple.png")).getImage();
         } catch (Exception e) {
-            System.err.println("Nie udało się załadować obrazka jabłka.");
+            System.err.println("Failed to load apple image.");
             e.printStackTrace();
         }
     }
 
-    private void initializeQuestionComponents() {
-        questionLabel = new JLabel("Question will appear here.");
-        questionLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        questionLabel.setForeground(Color.WHITE);
-        questionLabel.setBounds(100, 100, 800, 30);
-        questionLabel.setVisible(false);
-
-        answerField = new JTextField();
-        answerField.setBounds(100, 150, 200, 30);
-        answerField.setVisible(false);
-
-        submitButton = new JButton("Submit");
-        submitButton.setBounds(320, 150, 100, 30);
-        submitButton.setVisible(false);
-        submitButton.addActionListener(e -> handleAnswer(number1, number2));
-
-
-
-        this.setLayout(null);
-        this.add(questionLabel);
-        this.add(answerField);
-        this.add(submitButton);
+    private void initializeComponents() {
+        snake = new Snake((WIDTH * HEIGHT) / TILE_SIZE);
+        food = new Food();
+        questionManager = new QuestionManager(this, this::displayCorrectAnswerMessage);
     }
 
-    private void initializeGame() {
-        snakeLength = 2;
-
-        for (int i = 0; i < snakeLength; i++) {
-            snakeX[i] = TILE_SIZE * (5 - i);
-            snakeY[i] = TILE_SIZE * 5;
-        }
-
-        generateFood();
-        isGameActive = true;
+    private void startGame() {
+        snake.reset();
+        food.generate(WIDTH, HEIGHT);
         gameTimer = new Timer(GAME_SPEED, this);
         gameTimer.start();
         startTime = System.currentTimeMillis();
     }
 
-    private void generateFood() {
-        foodX = random.nextInt(WIDTH / TILE_SIZE) * TILE_SIZE;
-        foodY = random.nextInt(HEIGHT / TILE_SIZE) * TILE_SIZE;
-    }
+    private void displayCorrectAnswerMessage() {
+        questionManager.deactivateQuestion();
+        JLabel questionLabel = questionManager.getQuestionLabel();
+        JTextField answerField = questionManager.getAnswerField();
+        JButton submitButton = questionManager.getSubmitButton();
 
-    private void drawGame(Graphics g) {
-        if (appleImage != null) {
-            g.drawImage(appleImage, foodX, foodY, TILE_SIZE, TILE_SIZE, this);
-        } else {
-            g.setColor(Color.RED);
-            g.fillOval(foodX, foodY, TILE_SIZE, TILE_SIZE);
-        }
 
-        for (int i = 0; i < snakeLength; i++) {
-            if (i == 0) {
-                g.setColor(Color.GREEN);
-            } else {
-                g.setColor(new Color(34, 139, 34));
+
+        this.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    gameTimer.start(); // Wznowienie gry
+                    GamePanel.this.removeKeyListener(this); // Usuń nasłuchiwanie Enter
+                }
             }
-            g.fillRect(snakeX[i], snakeY[i], TILE_SIZE, TILE_SIZE);
-        }
-
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.BOLD, 18));
-        g.drawString("Points: " + points, 10, 20);
-        g.drawString("Level: " + level, 10, 40);
-        long elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000;
-        g.drawString("Time: " + elapsedSeconds + "s", 10, 60);
+        });
+        gameTimer.stop(); // Wstrzymanie gry
     }
 
     @Override
@@ -135,6 +87,26 @@ public class GamePanel extends JPanel implements ActionListener {
         } else {
             drawGameOver(g);
         }
+    }
+
+    private void drawGame(Graphics g) {
+        food.draw(g, appleImage);
+
+        for (int i = 0; i < snake.getLength(); i++) {
+            if (i == 0) {
+                g.setColor(Color.GREEN);
+            } else {
+                g.setColor(new Color(34, 139, 34));
+            }
+            g.fillRect(snake.getX(i), snake.getY(i), TILE_SIZE, TILE_SIZE);
+        }
+
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 18));
+        g.drawString("Points: " + points, 10, 20);
+        g.drawString("Level: " + level, 10, 40);
+        long elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000;
+        g.drawString("Time: " + elapsedSeconds + "s", 10, 60);
     }
 
     private void drawGameOver(Graphics g) {
@@ -154,107 +126,37 @@ public class GamePanel extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (isGameActive && !isQuestionActive) {
-            moveSnake();
-            checkFoodCollision();
-            checkCollision();
+        if (isGameActive && !questionManager.isVisible()) {
+            snake.move(dx, dy);
+            if (snake.getX(0) == food.getX() && snake.getY(0) == food.getY()) {
+                snake.grow();
+                points++;
+
+                if (points == 9 * level) {
+                    level++;
+                    if (level > 3) {
+                        isGameActive = false;
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Level Up! You are now on Level " + level + "!", "Level Up", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                }
+
+                if (points % 3 == 0) {
+                    questionManager.activateQuestion(generateRandomNumber(), generateRandomNumber());
+                } else {
+                    food.generate(WIDTH, HEIGHT);
+                }
+            }
+
+            if (snake.checkCollision(WIDTH, HEIGHT)) {
+                isGameActive = false;
+            }
         }
         repaint();
     }
 
-    private void moveSnake() {
-        for (int i = snakeLength - 1; i > 0; i--) {
-            snakeX[i] = snakeX[i - 1];
-            snakeY[i] = snakeY[i - 1];
-        }
-
-        snakeX[0] += dx;
-        snakeY[0] += dy;
-    }
-
-    private void checkFoodCollision() {
-        if (snakeX[0] == foodX && snakeY[0] == foodY) {
-            snakeLength++;
-            points++;
-
-            if (points % 3 == 0) {
-                number1 =random.nextInt(16);
-                number2 =random.nextInt(16);
-                activateQuestion(number1, number2);
-            }
-
-            if (points == 9*level) {
-                level++;
-                if (level > 3) {
-                    isGameActive = false;
-                } else {
-                    JOptionPane.showMessageDialog(this, "Level Up! You are now on Level " + level + "!", "Level Up", JOptionPane.INFORMATION_MESSAGE);
-                }
-            }
-
-
-            generateFood();
-        }
-    }
-
-    private void activateQuestion(int number1, int number2) {
-        isQuestionActive = true;
-
-        questionLabel.setText("Solve this: "+ number1 +" + "+ number2);
-        questionLabel.setVisible(true);
-
-        answerField.setText(""); // Reset pola tekstowego
-        answerField.setVisible(true);
-
-        submitButton.setVisible(true);
-
-        gameTimer.stop(); // Wstrzymanie gry na czas pytania
-    }
-    private void displayCorrectAnswerMessage() {
-        questionLabel.setText("Correct! Press Enter to continue.");
-        answerField.setVisible(false);
-        submitButton.setVisible(false);
-
-        this.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    questionLabel.setVisible(false);
-                    gameTimer.start(); // Wznowienie gry
-                    GamePanel.this.removeKeyListener(this); // Usuń nasłuchiwanie Enter
-                }
-            }
-
-        });
-        gameTimer.stop(); // Wstrzymanie gry
-    }
-    private void handleAnswer(int number1, int number2) {
-        int correctAnswer = number1 + number2; // Ustaw poprawną odpowiedź
-        String answer = answerField.getText();
-        try {
-            int userAnswer = Integer.parseInt(answer); // Parsuj odpowiedź użytkownika jako liczbę
-            if (userAnswer == correctAnswer) { // Jeśli odpowiedź jest poprawna
-                isQuestionActive = false;
-                displayCorrectAnswerMessage(); // Pokaż informację o poprawnej odpowiedzi
-            } else {
-                questionLabel.setText("Incorrect. Try again.Solve: " +number1 + " + "  +number2); // Zmień tekst pytania
-
-            }
-        } catch (NumberFormatException e) {
-            questionLabel.setText("Please enter a valid number."); // Komunikat o błędnym wejściu
-        }
-    }
-
-    private void checkCollision() {
-        if (snakeX[0] < 0 || snakeX[0] >= WIDTH || snakeY[0] < 0 || snakeY[0] >= HEIGHT) {
-            isGameActive = false;
-        }
-
-        for (int i = 1; i < snakeLength; i++) {
-            if (snakeX[0] == snakeX[i] && snakeY[0] == snakeY[i]) {
-                isGameActive = false;
-            }
-        }
+    private int generateRandomNumber() {
+        return (int) (Math.random() * 16);
     }
 
     private class MyKeyAdapter extends KeyAdapter {
