@@ -59,17 +59,11 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     private void displayCorrectAnswerMessage() {
-        questionManager.deactivateQuestion();
-        JLabel questionLabel = questionManager.getQuestionLabel();
-        JTextField answerField = questionManager.getAnswerField();
-        JButton submitButton = questionManager.getSubmitButton();
-
-
-
         this.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    questionManager.deactivateQuestion();
                     gameTimer.start(); // Wznowienie gry
                     GamePanel.this.removeKeyListener(this); // Usuń nasłuchiwanie Enter
                 }

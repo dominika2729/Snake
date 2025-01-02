@@ -69,19 +69,17 @@ public class QuestionManager {
     }
 
     private void handleAnswer() {
-        try {
-            int userAnswer = Integer.parseInt(answerField.getText());
-            if (userAnswer == number1 + number2) {
-                questionLabel.setText("Correct! Press Enter to continue.");
-                questionLabel.setVisible(true);
-                answerField.setVisible(false);
-                submitButton.setVisible(false);
-                onCorrectAnswer.run();
-            } else {
-                questionLabel.setText("Incorrect. Try again: " + number1 + " + " + number2);
-            }
-        } catch (NumberFormatException e) {
-            questionLabel.setText("Please enter a valid number.");
+        int userAnswer = Integer.parseInt(answerField.getText());
+        if (userAnswer == number1 + number2) {
+            questionLabel.setText("Correct! Press Enter to continue.");
+            questionLabel.setVisible(true);
+            answerField.setVisible(false);
+            submitButton.setVisible(false);
+
+            // Przenieś logikę "onCorrectAnswer.run()" na koniec
+            SwingUtilities.invokeLater(onCorrectAnswer);
+        } else {
+            questionLabel.setText("Incorrect. Try again: " + number1 + " + " + number2);
         }
     }
 }
