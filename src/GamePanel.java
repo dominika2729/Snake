@@ -7,7 +7,7 @@ public class GamePanel extends JPanel implements ActionListener {
     private static final int TILE_SIZE = 50;
     private static final int WIDTH = 1024;
     private static final int HEIGHT = 768;
-    private static final int GAME_SPEED = 100;
+    private static int GAME_SPEED = 180;
 
     private Snake snake;
     private Food food;
@@ -17,7 +17,7 @@ public class GamePanel extends JPanel implements ActionListener {
     private int dx = TILE_SIZE;
     private int dy = 0;
     private int points = 0;
-    private int level = 1;
+    public int level = 1;
     private boolean isGameActive = true;
 
     private long startTime;
@@ -103,12 +103,13 @@ public class GamePanel extends JPanel implements ActionListener {
         g.drawString("Time: " + elapsedSeconds + "s", 10, 60);
     }
 
-    private void drawGameOver(Graphics g) {
+    void drawGameOver(Graphics g) {
         g.setColor(Color.RED);
         g.setFont(new Font("Arial", Font.BOLD, 50));
         FontMetrics metrics = getFontMetrics(g.getFont());
 
         if (level > 3) {
+            gameTimer.stop();
             g.drawString("You Won!", (WIDTH - metrics.stringWidth("You Won!")) / 2, HEIGHT / 2 - 50);
             g.setFont(new Font("Arial", Font.PLAIN, 30));
             String result = "Final Score: " + points + ", Time: " + ((System.currentTimeMillis() - startTime) / 1000) + "s";
@@ -128,6 +129,10 @@ public class GamePanel extends JPanel implements ActionListener {
 
                 if (points == 9 * level) {
                     level++;
+                    if (level==2)
+                        GAME_SPEED = 100;
+                    if (level==3)
+                        GAME_SPEED = 30;
                     if (level > 3) {
                         isGameActive = false;
                     } else {
@@ -135,9 +140,16 @@ public class GamePanel extends JPanel implements ActionListener {
                     }
                 }
 
-                if (points % 3 == 0) {
-                    questionManager.activateQuestion(generateRandomNumber(), generateRandomNumber());
-                } else {
+                if (points % 3 == 0 && level == 1) {
+                    questionManager.activateQuestion(generateRandomNumber1(), generateRandomNumber1());
+                }
+                if (points % 3 == 0 && level == 2) {
+                    questionManager.activateQuestion(generateRandomNumber2(), generateRandomNumber2());
+                }
+                if (points % 3 == 0 && level == 3){
+                    questionManager.activateQuestion(generateRandomNumber3(), generateRandomNumber3());
+                }
+                else {
                     food.generate(WIDTH, HEIGHT);
                 }
             }
@@ -149,8 +161,17 @@ public class GamePanel extends JPanel implements ActionListener {
         repaint();
     }
 
-    private int generateRandomNumber() {
+    private int generateRandomNumber1() {
         return (int) (Math.random() * 16);
+    }
+    private int generateRandomNumber2() {
+        return (int) (Math.random() * 16)+15;
+    }
+    private int generateRandomNumber3() {
+        return (int) (Math.random() * 10);
+    }
+    public void endGame() {
+        isGameActive = false;
     }
 
     private class MyKeyAdapter extends KeyAdapter {

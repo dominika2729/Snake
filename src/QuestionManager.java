@@ -8,10 +8,13 @@ public class QuestionManager {
     private int number1;
     private int number2;
     private Runnable onCorrectAnswer;
+    GamePanel gamePanel;
 
-    public QuestionManager(Container parent, Runnable onCorrectAnswer) {
+
+    public QuestionManager(GamePanel gamePanel, Runnable onCorrectAnswer) {
+        this.gamePanel = gamePanel;
         this.onCorrectAnswer = onCorrectAnswer;
-        initializeComponents(parent);
+        initializeComponents(gamePanel);
     }
 
     private void initializeComponents(Container parent) {
@@ -39,7 +42,12 @@ public class QuestionManager {
         this.number1 = number1;
         this.number2 = number2;
 
-        questionLabel.setText("Solve this: " + number1 + " + " + number2);
+        if (gamePanel.level != 3) {
+            questionLabel.setText("Solve this: " + number1 + " + " + number2);
+        } else {
+            questionLabel.setText("Solve this: " + number1 + " * " + number2);
+        }
+
         questionLabel.setVisible(true);
         answerField.setText("");
         answerField.setVisible(true);
@@ -70,16 +78,32 @@ public class QuestionManager {
 
     private void handleAnswer() {
         int userAnswer = Integer.parseInt(answerField.getText());
-        if (userAnswer == number1 + number2) {
-            questionLabel.setText("Correct! Press Enter to continue.");
-            questionLabel.setVisible(true);
-            answerField.setVisible(false);
-            submitButton.setVisible(false);
+        if (gamePanel.level != 3) {
+            if (userAnswer == number1 + number2) {
+                questionLabel.setText("Correct! Press Enter to continue.");
+                questionLabel.setVisible(true);
+                answerField.setVisible(false);
+                submitButton.setVisible(false);
 
-            // Przenieś logikę "onCorrectAnswer.run()" na koniec
-            SwingUtilities.invokeLater(onCorrectAnswer);
+                SwingUtilities.invokeLater(onCorrectAnswer);
+            } else {
+                questionLabel.setText("Incorrect. Game Over.");
+                questionLabel.setVisible(true);
+                gamePanel.endGame(); // Zakończenie gry
+            }
         } else {
-            questionLabel.setText("Incorrect. Try again: " + number1 + " + " + number2);
+            if (userAnswer == number1 * number2) {
+                questionLabel.setText("Correct! Press Enter to continue.");
+                questionLabel.setVisible(true);
+                answerField.setVisible(false);
+                submitButton.setVisible(false);
+
+                SwingUtilities.invokeLater(onCorrectAnswer);
+            } else {
+                questionLabel.setText("Incorrect. Game Over.");
+                questionLabel.setVisible(true);
+                gamePanel.endGame(); // Zakończenie gry
+            }
         }
     }
 }
