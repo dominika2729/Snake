@@ -15,8 +15,8 @@ public class Food {
         }
 
         Random random = new Random();
-        x = random.nextInt(width / TILE_SIZE) * TILE_SIZE;
-        y = random.nextInt(height / TILE_SIZE) * TILE_SIZE;
+        x = random.nextInt((int)(width / TILE_SIZE)) * TILE_SIZE;
+        y = random.nextInt((int)(height / TILE_SIZE)) * TILE_SIZE;
     }
 
     public void draw(Graphics g, Image image) {

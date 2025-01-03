@@ -7,18 +7,18 @@ public class GamePanel extends JPanel implements ActionListener {
     private static final int TILE_SIZE = 50;
     private static final int WIDTH = 1024;
     private static final int HEIGHT = 768;
-    private static int GAME_SPEED = 180;
+    public static int GAME_SPEED = 180;
 
     private Snake snake;
     private Food food;
     private QuestionManager questionManager;
-    private Timer gameTimer;
+    public Timer gameTimer;
 
     private int dx = TILE_SIZE;
     private int dy = 0;
     int points = 0;
     public int level = 1;
-    private boolean isGameActive = true;
+    public boolean isGameActive = true;
 
     private long startTime;
     private Image appleImage;
@@ -47,6 +47,7 @@ public class GamePanel extends JPanel implements ActionListener {
         food.generate(WIDTH, HEIGHT);
         startTime = System.currentTimeMillis();
         gameTimer.restart();
+        gameTimer.setDelay(GAME_SPEED);
         questionManager.deactivateQuestion(); // Ukryj pytanie
         reattachKeyListener(); // Ponowne przypisanie KeyListener
         repaint(); // Odśwież panel
@@ -74,11 +75,13 @@ public class GamePanel extends JPanel implements ActionListener {
 
     public void endGame() {
         gameTimer.stop();
+
         int choice = JOptionPane.showConfirmDialog(this, "Game Over! Do you want to exit?", "Exit Game", JOptionPane.YES_NO_OPTION);
         if (choice == JOptionPane.YES_OPTION) {
             System.exit(0); // Zakończenie programu
         }
     }
+
     public int getPoints() {
         return points;
     }
@@ -147,20 +150,7 @@ public class GamePanel extends JPanel implements ActionListener {
         gameTimer.start(); // Start timera
         startTime = System.currentTimeMillis();
     }
-    private void startPanel(JFrame frame) {
-        JMenuBar startBar = new JMenuBar(); // Tworzymy pasek menu
-        JMenu startMenu = new JMenu("Game"); // Tworzymy menu o nazwie "Game"
-        JMenuItem startItem = new JMenuItem("START"); // Tworzymy element menu "START"
 
-        // Dodajemy akcję do przycisku START
-        startItem.addActionListener(e -> startGame());
-        startMenu.add(startItem); // Dodajemy element START do menu
-
-        startBar.add(startMenu); // Dodajemy menu do paska menu
-
-        // Dodajemy pasek menu do JFrame
-        frame.setJMenuBar(startBar);
-    }
 
     private void displayCorrectAnswerMessage() {
         this.addKeyListener(new KeyAdapter() {
@@ -222,20 +212,8 @@ public class GamePanel extends JPanel implements ActionListener {
             snake.move(dx, dy);
             if (snake.getX(0) == food.getX() && snake.getY(0) == food.getY()) {
                 snake.grow();
-                points++;
+                food.generate(WIDTH, HEIGHT);
 
-                if (points == 9 * level) {
-                    level++;
-                    if (level == 2)
-                        GAME_SPEED = 100;
-                    if (level == 3)
-                        GAME_SPEED = 30;
-                    if (level > 3) {
-                        isGameActive = false;
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Level Up! You are now on Level " + level + "!", "Level Up", JOptionPane.INFORMATION_MESSAGE);
-                    }
-                }
 
                 if (points % 3 == 0 && level == 1) {
                     questionManager.activateQuestion(generateRandomNumber1(), generateRandomNumber1());
@@ -246,14 +224,19 @@ public class GamePanel extends JPanel implements ActionListener {
                 } else {
                     food.generate(WIDTH, HEIGHT);
                 }
+
+
             }
 
             if (snake.checkCollision(WIDTH, HEIGHT)) {
                 isGameActive = false;
             }
+
+
+            // Aktualizacja widoku
+            updateStats();
+            repaint();
         }
-        updateStats(); // Aktualizacja statystyk w Frame
-        repaint();
     }
 
 

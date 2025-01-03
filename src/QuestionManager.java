@@ -1,7 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 
-public class QuestionManager {
+public class QuestionManager extends Component {
     private JLabel questionLabel;
     private JTextField answerField;
     private JButton submitButton;
@@ -84,6 +84,23 @@ public class QuestionManager {
                 questionLabel.setVisible(true);
                 answerField.setVisible(false);
                 submitButton.setVisible(false);
+                gamePanel.points+=3;
+                if(gamePanel.points%5==0){
+
+                    if (gamePanel.points == 15 * gamePanel.level) {
+                        gamePanel.level++;
+                        if (gamePanel.level == 2)
+                            gamePanel.GAME_SPEED = 120;
+                        if (gamePanel.level == 3)
+                            gamePanel.GAME_SPEED = 90;
+                        if (gamePanel.level > 3) {
+                            gamePanel.isGameActive = false;
+
+                        }
+                        JOptionPane.showMessageDialog(this, "Level Up! You are now on Level " + gamePanel.level + "!", "Level Up", JOptionPane.INFORMATION_MESSAGE);
+                        gamePanel.gameTimer.setDelay(gamePanel.GAME_SPEED);
+                    }
+                }
 
                 SwingUtilities.invokeLater(onCorrectAnswer);
             } else {
@@ -97,6 +114,7 @@ public class QuestionManager {
                 questionLabel.setVisible(true);
                 answerField.setVisible(false);
                 submitButton.setVisible(false);
+                gamePanel.points+=3;
 
                 SwingUtilities.invokeLater(onCorrectAnswer);
             } else {
