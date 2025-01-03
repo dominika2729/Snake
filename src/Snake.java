@@ -30,6 +30,14 @@ public class Snake {
     }
 
     public void grow() {
+        if (length > 0) {
+            int lastX = x[length - 1];
+            int lastY = y[length - 1];
+
+            // Dodanie nowego segmentu na pozycji ostatniego segmentu
+            x[length] = lastX;
+            y[length] = lastY;
+        }
         length++;
     }
 

@@ -7,7 +7,8 @@ public class Frame extends JFrame {
     private JLabel levelLabel;
     private JLabel timeLabel;
     private GamePanel gamePanel;
-    private JButton menuButton;
+    private JPanel mainPanel;
+    private CardLayout cardLayout;
 
     public Frame() {
         this.setTitle("Matematyczny snake");
@@ -15,77 +16,95 @@ public class Frame extends JFrame {
         this.setResizable(false);
         this.setLayout(new BorderLayout());
 
-        // Inicjalizacja gamePanel
-        gamePanel = new GamePanel();
-        this.add(gamePanel, BorderLayout.CENTER);
+        cardLayout = new CardLayout();
+        mainPanel = new JPanel(cardLayout);
 
-        // Dodanie menu
+        // Tworzenie panelu gry
+        gamePanel = new GamePanel();
+
+        // Tworzenie panelu startowego
+        JPanel startPanel = createStartPanel();
+
+        // Dodanie paneli do głównego panelu z CardLayout
+        mainPanel.add(startPanel, "StartPanel");
+        mainPanel.add(gamePanel, "GamePanel");
+
+        // Dodanie głównego panelu do JFrame
+        this.add(mainPanel, BorderLayout.CENTER);
+
+        // Dodanie dolnego menu
         JPanel menuPanel = createMenuPanel();
         this.add(menuPanel, BorderLayout.SOUTH);
 
         this.pack();
-        this.setVisible(true);
         this.setLocationRelativeTo(null);
+        this.setVisible(true);
     }
 
-    // Tworzenie dolnego menu
+    private JPanel createStartPanel() {
+        JPanel startPanel = new JPanel();
+        startPanel.setLayout(new GridBagLayout());
+        startPanel.setBackground(Color.BLACK);
+
+        JButton startButton = new JButton("START");
+        startButton.setPreferredSize(new Dimension(150, 50));
+        startButton.setFont(new Font("Arial", Font.BOLD, 18));
+        startPanel.add(startButton);
+
+        // Akcja po kliknięciu przycisku START
+        startButton.addActionListener(e -> {
+            cardLayout.show(mainPanel, "GamePanel"); // Przełączenie na panel gry
+            gamePanel.requestFocusInWindow();       // Ustaw fokus na GamePanel
+            gamePanel.startGame();                  // Rozpoczęcie gry
+        });
+
+        return startPanel;
+    }
+
     private JPanel createMenuPanel() {
         JPanel menuPanel = new JPanel();
         menuPanel.setPreferredSize(new Dimension(1024, 100));
         menuPanel.setBackground(Color.DARK_GRAY);
         menuPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 50, 20));
 
-        // Punkty
         pointsLabel = new JLabel("Points: 0");
         pointsLabel.setForeground(Color.WHITE);
         pointsLabel.setFont(new Font("Arial", Font.BOLD, 18));
         menuPanel.add(pointsLabel);
 
-        // Poziom
         levelLabel = new JLabel("Level: 1");
         levelLabel.setForeground(Color.WHITE);
         levelLabel.setFont(new Font("Arial", Font.BOLD, 18));
         menuPanel.add(levelLabel);
 
-        // Czas
         timeLabel = new JLabel("Time: 0s");
         timeLabel.setForeground(Color.WHITE);
         timeLabel.setFont(new Font("Arial", Font.BOLD, 18));
         menuPanel.add(timeLabel);
 
-        // Przycisk menu
-        menuButton = new JButton("Menu");
-        menuButton.setFont(new Font("Arial", Font.BOLD, 18));
-        menuButton.addActionListener(e -> showMenu());
-        menuPanel.add(menuButton); // Dodanie przycisku do panelu
+        // Dodanie przycisków do sterowania grą
+        JButton pauseButton = new JButton("Pause");
+        pauseButton.addActionListener(e -> gamePanel.pauseGame());
+        menuPanel.add(pauseButton);
+
+        JButton resumeButton = new JButton("Resume");
+        resumeButton.addActionListener(e -> gamePanel.resumeGame());
+        menuPanel.add(resumeButton);
+
+        JButton exitButton = new JButton("Exit");
+        exitButton.addActionListener(e -> System.exit(0));
+        menuPanel.add(exitButton);
+
+        JButton restartButton = new JButton("Restart");
+        restartButton.setPreferredSize(new Dimension(150, 40));
+        restartButton.setFont(new Font("Arial", Font.BOLD, 16));
+        restartButton.addActionListener(e -> gamePanel.restartGame()); // Akcja restartu
+        menuPanel.add(restartButton);
 
         return menuPanel;
     }
 
-
-    // Metoda do wyświetlenia menu po kliknięciu przycisku
-    private void showMenu() {
-        String[] options = {"Pause", "Resume", "Restart", "Exit"};
-        int choice = JOptionPane.showOptionDialog(
-                this,
-                "What would you like to do?",
-                "Menu",
-                JOptionPane.DEFAULT_OPTION,
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                options,
-                options[0]
-        );
-
-        switch (choice) {
-            case 0 -> gamePanel.pauseGame(); // Wstrzymaj grę
-            case 1 -> gamePanel.resumeGame(); // Wznów grę
-            case 2 -> gamePanel.restartGame(); // Zacznij od nowa
-            case 3 -> gamePanel.endGame(); // Zakończ grę
-        }
-    }
-
-    // Aktualizacja punktów i poziomu (do wywołania z GamePanel)
+    // Aktualizacja punktów i poziomu
     public void updateStats(int points, int level, long elapsedTime) {
         pointsLabel.setText("Points: " + points);
         levelLabel.setText("Level: " + level);

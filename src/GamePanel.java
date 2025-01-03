@@ -33,8 +33,8 @@ public class GamePanel extends JPanel implements ActionListener {
         loadAppleImage();
         initializeComponents();
         createMenu(); // Tworzenie menu
-        startGame();
     }
+
 
     public void restartGame() {
         points = 0;
@@ -49,7 +49,7 @@ public class GamePanel extends JPanel implements ActionListener {
         gameTimer.restart();
         questionManager.deactivateQuestion(); // Ukryj pytanie
         reattachKeyListener(); // Ponowne przypisanie KeyListener
-        repaint();
+        repaint(); // Odśwież panel
     }
 
     public void pauseGame() {
@@ -60,21 +60,21 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     public void resumeGame() {
-        if (isGameActive) {
-            reattachKeyListener(); // Ponowne przypisanie KeyListener
-            gameTimer.start(); // Wznowienie timera
+        if (isGameActive && gameTimer != null) { // Sprawdzenie, czy gra jest aktywna i timer istnieje
+            reattachKeyListener();              // Ponowne przypisanie KeyListener
+            gameTimer.start();                  // Wznowienie timera
+            this.requestFocusInWindow();        // Ustawienie fokusu na panel gry
         }
     }
-
     private void reattachKeyListener() {
-        // Usuń starego KeyListenera i dodaj nowego
-        this.removeKeyListener(getKeyListeners()[0]);
-        this.addKeyListener(new MyKeyAdapter());
-        this.requestFocusInWindow();
+        this.removeKeyListener(getKeyListeners()[0]); // Usuń starego nasłuchiwacza
+        this.addKeyListener(new MyKeyAdapter());      // Dodaj nowego nasłuchiwacza
+        this.requestFocusInWindow();                 // Wymuś fokus na panel gry
     }
 
     public void endGame() {
-        int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit?", "Exit Game", JOptionPane.YES_NO_OPTION);
+        gameTimer.stop();
+        int choice = JOptionPane.showConfirmDialog(this, "Game Over! Do you want to exit?", "Exit Game", JOptionPane.YES_NO_OPTION);
         if (choice == JOptionPane.YES_OPTION) {
             System.exit(0); // Zakończenie programu
         }
@@ -138,12 +138,28 @@ public class GamePanel extends JPanel implements ActionListener {
         questionManager = new QuestionManager(this, this::displayCorrectAnswerMessage);
     }
 
-    private void startGame() {
+    public void startGame() {
         snake.reset();
         food.generate(WIDTH, HEIGHT);
-        gameTimer = new Timer(GAME_SPEED, this);
-        gameTimer.start();
+        if (gameTimer == null) { // Inicjalizacja timera tylko raz
+            gameTimer = new Timer(GAME_SPEED, this);
+        }
+        gameTimer.start(); // Start timera
         startTime = System.currentTimeMillis();
+    }
+    private void startPanel(JFrame frame) {
+        JMenuBar startBar = new JMenuBar(); // Tworzymy pasek menu
+        JMenu startMenu = new JMenu("Game"); // Tworzymy menu o nazwie "Game"
+        JMenuItem startItem = new JMenuItem("START"); // Tworzymy element menu "START"
+
+        // Dodajemy akcję do przycisku START
+        startItem.addActionListener(e -> startGame());
+        startMenu.add(startItem); // Dodajemy element START do menu
+
+        startBar.add(startMenu); // Dodajemy menu do paska menu
+
+        // Dodajemy pasek menu do JFrame
+        frame.setJMenuBar(startBar);
     }
 
     private void displayCorrectAnswerMessage() {
