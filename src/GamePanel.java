@@ -16,7 +16,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
     private int dx = TILE_SIZE;
     private int dy = 0;
-    private int points = 0;
+    int points = 0;
     public int level = 1;
     private boolean isGameActive = true;
 
@@ -32,9 +32,97 @@ public class GamePanel extends JPanel implements ActionListener {
 
         loadAppleImage();
         initializeComponents();
+        createMenu(); // Tworzenie menu
         startGame();
     }
 
+    public void restartGame() {
+        points = 0;
+        level = 1;
+        dx = TILE_SIZE;
+        dy = 0;
+        isGameActive = true;
+        GAME_SPEED = 180; // Przywróć domyślną prędkość gry
+        snake.reset();
+        food.generate(WIDTH, HEIGHT);
+        startTime = System.currentTimeMillis();
+        gameTimer.restart();
+        questionManager.deactivateQuestion(); // Ukryj pytanie
+        reattachKeyListener(); // Ponowne przypisanie KeyListener
+        repaint();
+    }
+
+    public void pauseGame() {
+        if (isGameActive) {
+            gameTimer.stop(); // Wstrzymanie timera
+            JOptionPane.showMessageDialog(this, "Game Paused. Select 'Resume' to continue.", "Paused", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    public void resumeGame() {
+        if (isGameActive) {
+            reattachKeyListener(); // Ponowne przypisanie KeyListener
+            gameTimer.start(); // Wznowienie timera
+        }
+    }
+
+    private void reattachKeyListener() {
+        // Usuń starego KeyListenera i dodaj nowego
+        this.removeKeyListener(getKeyListeners()[0]);
+        this.addKeyListener(new MyKeyAdapter());
+        this.requestFocusInWindow();
+    }
+
+    public void endGame() {
+        int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit?", "Exit Game", JOptionPane.YES_NO_OPTION);
+        if (choice == JOptionPane.YES_OPTION) {
+            System.exit(0); // Zakończenie programu
+        }
+    }
+    public int getPoints() {
+        return points;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+    private void updateStats() {
+        long elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000;
+        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        if (frame instanceof Frame) {
+            ((Frame) frame).updateStats(points, level, elapsedSeconds);
+        }
+    }
+
+    private void createMenu() {
+        JMenuBar menuBar = new JMenuBar();
+
+        // Menu Gra
+        JMenu gameMenu = new JMenu("Game");
+
+        // Opcja Wstrzymaj
+        JMenuItem pauseItem = new JMenuItem("Pause");
+        pauseItem.addActionListener(e -> pauseGame());
+        gameMenu.add(pauseItem);
+
+        // Opcja Wznów
+        JMenuItem resumeItem = new JMenuItem("Resume");
+        resumeItem.addActionListener(e -> resumeGame());
+        gameMenu.add(resumeItem);
+
+        // Opcja Zakończ
+        JMenuItem exitItem = new JMenuItem("Exit");
+        exitItem.addActionListener(e -> endGame());
+        gameMenu.add(exitItem);
+
+        menuBar.add(gameMenu);
+
+        // Dodanie menu na górę okna
+        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        if (frame != null) {
+            frame.setJMenuBar(menuBar);
+        }
+    }
     private void loadAppleImage() {
         try {
             appleImage = new ImageIcon(getClass().getResource("/apple.png")).getImage();
@@ -94,13 +182,6 @@ public class GamePanel extends JPanel implements ActionListener {
             }
             g.fillRect(snake.getX(i), snake.getY(i), TILE_SIZE, TILE_SIZE);
         }
-
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.BOLD, 18));
-        g.drawString("Points: " + points, 10, 20);
-        g.drawString("Level: " + level, 10, 40);
-        long elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000;
-        g.drawString("Time: " + elapsedSeconds + "s", 10, 60);
     }
 
     void drawGameOver(Graphics g) {
@@ -129,9 +210,9 @@ public class GamePanel extends JPanel implements ActionListener {
 
                 if (points == 9 * level) {
                     level++;
-                    if (level==2)
+                    if (level == 2)
                         GAME_SPEED = 100;
-                    if (level==3)
+                    if (level == 3)
                         GAME_SPEED = 30;
                     if (level > 3) {
                         isGameActive = false;
@@ -142,14 +223,11 @@ public class GamePanel extends JPanel implements ActionListener {
 
                 if (points % 3 == 0 && level == 1) {
                     questionManager.activateQuestion(generateRandomNumber1(), generateRandomNumber1());
-                }
-                if (points % 3 == 0 && level == 2) {
+                } else if (points % 3 == 0 && level == 2) {
                     questionManager.activateQuestion(generateRandomNumber2(), generateRandomNumber2());
-                }
-                if (points % 3 == 0 && level == 3){
+                } else if (points % 3 == 0 && level == 3) {
                     questionManager.activateQuestion(generateRandomNumber3(), generateRandomNumber3());
-                }
-                else {
+                } else {
                     food.generate(WIDTH, HEIGHT);
                 }
             }
@@ -158,8 +236,10 @@ public class GamePanel extends JPanel implements ActionListener {
                 isGameActive = false;
             }
         }
+        updateStats(); // Aktualizacja statystyk w Frame
         repaint();
     }
+
 
     private int generateRandomNumber1() {
         return (int) (Math.random() * 16);
@@ -169,9 +249,6 @@ public class GamePanel extends JPanel implements ActionListener {
     }
     private int generateRandomNumber3() {
         return (int) (Math.random() * 10);
-    }
-    public void endGame() {
-        isGameActive = false;
     }
 
     private class MyKeyAdapter extends KeyAdapter {

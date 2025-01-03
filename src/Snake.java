@@ -56,4 +56,11 @@ public class Snake {
     public int getLength() {
         return length;
     }
+
+    public void draw(Graphics g) {
+        g.setColor(Color.GREEN); // Kolor węża
+        for (int i = 0; i < length; i++) {
+            g.fillRect(x[i], y[i], TILE_SIZE, TILE_SIZE); // Rysowanie segmentów węża
+        }
+    }
 }
