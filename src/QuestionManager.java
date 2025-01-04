@@ -102,12 +102,11 @@ public class QuestionManager extends Component {
 
                 }
 
-
                 SwingUtilities.invokeLater(onCorrectAnswer);
             } else {
                 questionLabel.setText("Incorrect. Game Over.");
                 questionLabel.setVisible(true);
-                gamePanel.endGame(); // Zakończenie gry
+                gamePanel.endGame();
             }
         } else {
             if (userAnswer == number1 * number2) {
@@ -128,7 +127,7 @@ public class QuestionManager extends Component {
             } else {
                 questionLabel.setText("Incorrect. Game Over.");
                 questionLabel.setVisible(true);
-                gamePanel.endGame(); // Zakończenie gry
+                gamePanel.endGame();
             }
         }
     }

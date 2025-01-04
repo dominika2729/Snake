@@ -34,7 +34,6 @@ public class Snake {
             int lastX = x[length - 1];
             int lastY = y[length - 1];
 
-            // Dodanie nowego segmentu na pozycji ostatniego segmentu
             x[length] = lastX;
             y[length] = lastY;
         }
@@ -66,9 +65,9 @@ public class Snake {
     }
 
     public void draw(Graphics g) {
-        g.setColor(Color.GREEN); // Kolor węża
+        g.setColor(Color.GREEN);
         for (int i = 0; i < length; i++) {
-            g.fillRect(x[i], y[i], TILE_SIZE, TILE_SIZE); // Rysowanie segmentów węża
+            g.fillRect(x[i], y[i], TILE_SIZE, TILE_SIZE);
         }
     }
 }

@@ -19,20 +19,20 @@ public class Frame extends JFrame {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        // Tworzenie panelu gry
+
         gamePanel = new GamePanel();
 
-        // Tworzenie panelu startowego
+
         JPanel startPanel = createStartPanel();
 
         // Dodanie paneli do głównego panelu z CardLayout
         mainPanel.add(startPanel, "StartPanel");
         mainPanel.add(gamePanel, "GamePanel");
 
-        // Dodanie głównego panelu do JFrame
+
         this.add(mainPanel, BorderLayout.CENTER);
 
-        // Dodanie dolnego menu
+
         JPanel menuPanel = createMenuPanel();
         this.add(menuPanel, BorderLayout.SOUTH);
 
@@ -51,11 +51,11 @@ public class Frame extends JFrame {
         startButton.setFont(new Font("Arial", Font.BOLD, 18));
         startPanel.add(startButton);
 
-        // Akcja po kliknięciu przycisku START
+
         startButton.addActionListener(e -> {
-            cardLayout.show(mainPanel, "GamePanel"); // Przełączenie na panel gry
-            gamePanel.requestFocusInWindow();       // Ustaw fokus na GamePanel
-            gamePanel.startGame();                  // Rozpoczęcie gry
+            cardLayout.show(mainPanel, "GamePanel");
+            gamePanel.requestFocusInWindow();
+            gamePanel.startGame();
         });
 
         return startPanel;
@@ -82,7 +82,7 @@ public class Frame extends JFrame {
         timeLabel.setFont(new Font("Arial", Font.BOLD, 18));
         menuPanel.add(timeLabel);
 
-        // Dodanie przycisków do sterowania grą
+
         JButton pauseButton = new JButton("Pause");
         pauseButton.addActionListener(e -> gamePanel.pauseGame());
         menuPanel.add(pauseButton);
@@ -98,13 +98,13 @@ public class Frame extends JFrame {
         JButton restartButton = new JButton("Restart");
         restartButton.setPreferredSize(new Dimension(100, 25));
         restartButton.setFont(new Font("Arial", Font.BOLD, 16));
-        restartButton.addActionListener(e -> gamePanel.restartGame()); // Akcja restartu
+        restartButton.addActionListener(e -> gamePanel.restartGame());
         menuPanel.add(restartButton);
 
         return menuPanel;
     }
 
-    // Aktualizacja punktów i poziomu
+
     public void updateStats(int points, int level, long elapsedTime) {
         pointsLabel.setText("Points: " + points);
         levelLabel.setText("Level: " + level);

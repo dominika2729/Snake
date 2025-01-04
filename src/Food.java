@@ -7,7 +7,7 @@ public class Food {
     private static final int TILE_SIZE = 50;
 
     public void generate(int width, int height) {
-        // Sprawdzenie, czy wymiary są wystarczająco duże
+
         if (width < TILE_SIZE || height < TILE_SIZE) {
             System.out.println("Warning: Dimensions are too small. Adjusting to minimum size.");
             width = TILE_SIZE;

@@ -16,8 +16,8 @@ public class GamePanel extends JPanel implements ActionListener {
 
     private int dx = TILE_SIZE;
     private int dy = 0;
-    int points = 42;
-    public int level = 3;
+    int points = 0;
+    public int level = 1;
     public boolean isGameActive = true;
 
     public long startTime;
@@ -32,7 +32,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
         loadAppleImage();
         initializeComponents();
-        createMenu(); // Tworzenie menu
+        createMenu();
     }
 
 
@@ -42,36 +42,36 @@ public class GamePanel extends JPanel implements ActionListener {
         dx = TILE_SIZE;
         dy = 0;
         isGameActive = true;
-        GAME_SPEED = 180; // Przywróć domyślną prędkość gry
+        GAME_SPEED = 180;
         snake.reset();
         food.generate(WIDTH, HEIGHT);
         startTime = System.currentTimeMillis();
         gameTimer.restart();
         gameTimer.setDelay(GAME_SPEED);
-        questionManager.deactivateQuestion(); // Ukryj pytanie
-        reattachKeyListener(); // Ponowne przypisanie KeyListener
-        repaint(); // Odśwież panel
+        questionManager.deactivateQuestion();
+        reattachKeyListener();
+        repaint();
     }
 
     public void pauseGame() {
         if (isGameActive) {
-            gameTimer.stop(); // Wstrzymanie timera
+            gameTimer.stop();
             JOptionPane.showMessageDialog(this, "Game Paused. Select 'Resume' to continue.", "Paused", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
     public void resumeGame() {
-        if (isGameActive && gameTimer != null) { // Sprawdzenie, czy gra jest aktywna i timer istnieje
-            reattachKeyListener();              // Ponowne przypisanie KeyListener
-            gameTimer.start();                  // Wznowienie timera
-            this.requestFocusInWindow();        // Ustawienie fokusu na panel gry
+        if (isGameActive && gameTimer != null) {
+            reattachKeyListener();
+            gameTimer.start();
+            this.requestFocusInWindow();
         }
     }
 
     private void reattachKeyListener() {
-        this.removeKeyListener(getKeyListeners()[0]); // Usuń starego nasłuchiwacza
-        this.addKeyListener(new MyKeyAdapter());      // Dodaj nowego nasłuchiwacza
-        this.requestFocusInWindow();                 // Wymuś fokus na panel gry
+        this.removeKeyListener(getKeyListeners()[0]);
+        this.addKeyListener(new MyKeyAdapter());
+        this.requestFocusInWindow();
     }
 
     public void endGame() {
@@ -79,7 +79,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
         int choice = JOptionPane.showConfirmDialog(this, "Game Over! Do you want to exit?", "Exit Game", JOptionPane.YES_NO_OPTION);
         if (choice == JOptionPane.YES_OPTION) {
-            System.exit(0); // Zakończenie programu
+            System.exit(0);
         }
     }
 
@@ -101,28 +101,21 @@ public class GamePanel extends JPanel implements ActionListener {
 
     private void createMenu() {
         JMenuBar menuBar = new JMenuBar();
-
-        // Menu Gra
         JMenu gameMenu = new JMenu("Game");
-
-        // Opcja Wstrzymaj
         JMenuItem pauseItem = new JMenuItem("Pause");
         pauseItem.addActionListener(e -> pauseGame());
         gameMenu.add(pauseItem);
 
-        // Opcja Wznów
         JMenuItem resumeItem = new JMenuItem("Resume");
         resumeItem.addActionListener(e -> resumeGame());
         gameMenu.add(resumeItem);
 
-        // Opcja Zakończ
         JMenuItem exitItem = new JMenuItem("Exit");
         exitItem.addActionListener(e -> endGame());
         gameMenu.add(exitItem);
 
         menuBar.add(gameMenu);
 
-        // Dodanie menu na górę okna
         JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
         if (frame != null) {
             frame.setJMenuBar(menuBar);
@@ -147,13 +140,12 @@ public class GamePanel extends JPanel implements ActionListener {
     public void startGame() {
         snake.reset();
         food.generate(WIDTH, HEIGHT);
-        if (gameTimer == null) { // Inicjalizacja timera tylko raz
+        if (gameTimer == null) {
             gameTimer = new Timer(GAME_SPEED, this);
         }
-        gameTimer.start(); // Start timera
+        gameTimer.start();
         startTime = System.currentTimeMillis();
     }
-
 
     private void displayCorrectAnswerMessage() {
         this.addKeyListener(new KeyAdapter() {
@@ -161,12 +153,12 @@ public class GamePanel extends JPanel implements ActionListener {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     questionManager.deactivateQuestion();
-                    gameTimer.start(); // Wznowienie gry
-                    GamePanel.this.removeKeyListener(this); // Usuń nasłuchiwanie Enter
+                    gameTimer.start();
+                    GamePanel.this.removeKeyListener(this);
                 }
             }
         });
-        gameTimer.stop(); // Wstrzymanie gry
+        gameTimer.stop();
     }
 
     @Override
@@ -235,8 +227,6 @@ public class GamePanel extends JPanel implements ActionListener {
                 isGameActive = false;
             }
 
-
-            // Aktualizacja widoku
             updateStats();
             repaint();
         }
