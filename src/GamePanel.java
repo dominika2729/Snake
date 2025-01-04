@@ -16,11 +16,11 @@ public class GamePanel extends JPanel implements ActionListener {
 
     private int dx = TILE_SIZE;
     private int dy = 0;
-    int points = 0;
-    public int level = 1;
+    int points = 42;
+    public int level = 3;
     public boolean isGameActive = true;
 
-    private long startTime;
+    public long startTime;
     private Image appleImage;
 
     public GamePanel() {
@@ -67,6 +67,7 @@ public class GamePanel extends JPanel implements ActionListener {
             this.requestFocusInWindow();        // Ustawienie fokusu na panel gry
         }
     }
+
     private void reattachKeyListener() {
         this.removeKeyListener(getKeyListeners()[0]); // Usuń starego nasłuchiwacza
         this.addKeyListener(new MyKeyAdapter());      // Dodaj nowego nasłuchiwacza
@@ -89,6 +90,7 @@ public class GamePanel extends JPanel implements ActionListener {
     public int getLevel() {
         return level;
     }
+
     private void updateStats() {
         long elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000;
         JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
@@ -126,6 +128,7 @@ public class GamePanel extends JPanel implements ActionListener {
             frame.setJMenuBar(menuBar);
         }
     }
+
     private void loadAppleImage() {
         try {
             appleImage = new ImageIcon(getClass().getResource("/apple.png")).getImage();
@@ -243,9 +246,11 @@ public class GamePanel extends JPanel implements ActionListener {
     private int generateRandomNumber1() {
         return (int) (Math.random() * 16);
     }
+
     private int generateRandomNumber2() {
-        return (int) (Math.random() * 16)+15;
+        return (int) (Math.random() * 16) + 15;
     }
+
     private int generateRandomNumber3() {
         return (int) (Math.random() * 10);
     }

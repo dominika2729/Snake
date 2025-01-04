@@ -9,6 +9,7 @@ public class QuestionManager extends Component {
     private int number2;
     private Runnable onCorrectAnswer;
     GamePanel gamePanel;
+    boolean isTrue = true;
 
 
     public QuestionManager(GamePanel gamePanel, Runnable onCorrectAnswer) {
@@ -78,14 +79,15 @@ public class QuestionManager extends Component {
 
     private void handleAnswer() {
         int userAnswer = Integer.parseInt(answerField.getText());
+        isTrue = userAnswer == number1 + number2;
         if (gamePanel.level != 3) {
-            if (userAnswer == number1 + number2) {
+            if (isTrue) {
                 questionLabel.setText("Correct! Press Enter to continue.");
                 questionLabel.setVisible(true);
                 answerField.setVisible(false);
                 submitButton.setVisible(false);
-                gamePanel.points+=3;
-                if(gamePanel.points%5==0){
+                gamePanel.points += 3;
+                if (gamePanel.points % 15 == 0) {
 
                     if (gamePanel.points == 15 * gamePanel.level) {
                         gamePanel.level++;
@@ -93,14 +95,13 @@ public class QuestionManager extends Component {
                             gamePanel.GAME_SPEED = 120;
                         if (gamePanel.level == 3)
                             gamePanel.GAME_SPEED = 90;
-                        if (gamePanel.level > 3) {
-                            gamePanel.isGameActive = false;
 
-                        }
                         JOptionPane.showMessageDialog(this, "Level Up! You are now on Level " + gamePanel.level + "!", "Level Up", JOptionPane.INFORMATION_MESSAGE);
                         gamePanel.gameTimer.setDelay(gamePanel.GAME_SPEED);
                     }
+
                 }
+
 
                 SwingUtilities.invokeLater(onCorrectAnswer);
             } else {
@@ -114,9 +115,16 @@ public class QuestionManager extends Component {
                 questionLabel.setVisible(true);
                 answerField.setVisible(false);
                 submitButton.setVisible(false);
-                gamePanel.points+=3;
-
+                gamePanel.points += 3;
                 SwingUtilities.invokeLater(onCorrectAnswer);
+                if (gamePanel.points == 45) {
+                    gamePanel.gameTimer.stop();
+                    gamePanel.isGameActive = false;
+                    JOptionPane.showMessageDialog(this, "You Won! Your score: " + gamePanel.points + " Time: " + ((System.currentTimeMillis() - gamePanel.startTime) / 1000) + "s", "Victory", JOptionPane.INFORMATION_MESSAGE);
+
+
+                }
+
             } else {
                 questionLabel.setText("Incorrect. Game Over.");
                 questionLabel.setVisible(true);

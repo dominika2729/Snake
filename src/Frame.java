@@ -96,7 +96,7 @@ public class Frame extends JFrame {
         menuPanel.add(exitButton);
 
         JButton restartButton = new JButton("Restart");
-        restartButton.setPreferredSize(new Dimension(150, 40));
+        restartButton.setPreferredSize(new Dimension(100, 25));
         restartButton.setFont(new Font("Arial", Font.BOLD, 16));
         restartButton.addActionListener(e -> gamePanel.restartGame()); // Akcja restartu
         menuPanel.add(restartButton);
